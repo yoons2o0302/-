@@ -1316,12 +1316,12 @@ export default function App() {
   const [mapImageSrc, setMapImageSrc] = useState<string>(() => {
     const local = localStorage.getItem('forena_map_image');
     if (local) return local;
-    return "/uploads/map.png";
+    return forenaMapImg;
   });
   const [communityImageSrc, setCommunityImageSrc] = useState<string>(() => {
     const local = localStorage.getItem('forena_community_image');
     if (local) return local;
-    return "/uploads/community.png";
+    return forenaCommunityImg;
   });
   const [isUploadingCommunity, setIsUploadingCommunity] = useState(false);
   const [transparentLogo, setTransparentLogo] = useState<string>('');
