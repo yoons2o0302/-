@@ -417,16 +417,19 @@ app.post("/api/sms-config", (req, res) => {
 // Vite middleware configuration for development, regular static files for production
 async function setupVite() {
   const distPath = path.join(process.cwd(), "dist");
-  const hasDist = fs.existsSync(path.join(distPath, "index.html"));
 
-  if (process.env.NODE_ENV === "production" || hasDist) {
-    console.log("[Server] Serving compiled static files from dist...");
+  if (process.env.NODE_ENV === "production") {
+    console.log("[Server] Running in PRODUCTION mode. Serving compiled static files from dist...");
     app.use(express.static(distPath));
-    app.get("*", (req, res) => {
+    app.get("*", (req, res, next) => {
+      // Do not serve index.html fallback for missing static assets/files
+      if (req.path.includes(".") || req.path.startsWith("/assets/")) {
+        return next();
+      }
       res.sendFile(path.join(distPath, "index.html"));
     });
   } else {
-    console.log("[Vite] Compiled dist index.html not found or in development mode. Starting Vite server middleware...");
+    console.log("[Vite] Running in DEVELOPMENT mode. Starting live Vite server middleware...");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
