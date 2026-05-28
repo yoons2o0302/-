@@ -1,0 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Noto+Sans+KR:wght@500;750&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #4A628A;
+  --color-accent: #2C3E50;
+  --color-bg-light: #F8F9FA;
+  --font-pretendard: "Pretendard", "Noto Sans KR", sans-serif;
+  --font-cinzel: "Cinzel", serif;
+}
+
+@layer base {
+  body {
+    @apply bg-[var(--color-bg-light)] text-gray-900 font-pretendard antialiased;
+  }
+}
