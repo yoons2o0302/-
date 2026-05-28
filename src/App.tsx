@@ -1314,10 +1314,14 @@ export default function App() {
   const [isSmsConfigOpen, setIsSmsConfigOpen] = useState(false);
   const [isMapZoomOpen, setIsMapZoomOpen] = useState(false);
   const [mapImageSrc, setMapImageSrc] = useState<string>(() => {
-    return localStorage.getItem('forena_map_image') || forenaMapImg;
+    const local = localStorage.getItem('forena_map_image');
+    if (local) return local;
+    return "/uploads/map.png";
   });
   const [communityImageSrc, setCommunityImageSrc] = useState<string>(() => {
-    return localStorage.getItem('forena_community_image') || forenaCommunityImg;
+    const local = localStorage.getItem('forena_community_image');
+    if (local) return local;
+    return "/uploads/community.png";
   });
   const [isUploadingCommunity, setIsUploadingCommunity] = useState(false);
   const [transparentLogo, setTransparentLogo] = useState<string>('');
@@ -1521,6 +1525,11 @@ export default function App() {
             src={mapImageSrc} 
             alt="한화포레나 인천학익 광역입지도" 
             referrerPolicy="no-referrer"
+            onError={() => {
+              if (mapImageSrc === "/uploads/map.png") {
+                setMapImageSrc(forenaMapImg);
+              }
+            }}
             className="w-full h-auto object-contain rounded-xs transition-transform duration-700 group-hover:scale-[1.005]" 
           />
           
@@ -1636,6 +1645,11 @@ export default function App() {
                   src={communityImageSrc} 
                   alt="한화포레나 인천학익 커뮤니티 시설 동호수 및 3D 입체 투시도" 
                   referrerPolicy="no-referrer"
+                  onError={() => {
+                    if (communityImageSrc === "/uploads/community.png") {
+                      setCommunityImageSrc(forenaCommunityImg);
+                    }
+                  }}
                   className="w-full h-auto object-contain rounded-xs transition-transform duration-500 group-hover:scale-[1.01]"
                 />
                 
@@ -1675,6 +1689,11 @@ export default function App() {
               <img 
                 src={mapImageSrc} 
                 alt="한화포레나 인천학익 광역입지도 크게 보기"
+                onError={() => {
+                  if (mapImageSrc === "/uploads/map.png") {
+                    setMapImageSrc(forenaMapImg);
+                  }
+                }}
                 className="w-full h-auto max-h-[85vh] object-contain rounded-xs shadow-2xl" 
               />
             </div>

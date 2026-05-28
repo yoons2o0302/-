@@ -13,6 +13,58 @@ const PORT = 3000;
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
+const UPLOADS_DIR = path.join(process.cwd(), "uploads");
+if (!fs.existsSync(UPLOADS_DIR)) {
+  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+}
+app.use("/uploads", express.static(UPLOADS_DIR));
+
+const MAP_DATA_FILE = path.join(process.cwd(), "map-image.json");
+const COMMUNITY_DATA_FILE = path.join(process.cwd(), "community-image.json");
+const GALLERY_DATA_FILE = path.join(process.cwd(), "gallery-images.json");
+
+// Automatically migrate existing stored base64 JSON files to static physical images
+function migrateJsonToUploads() {
+  try {
+    const targetMap = path.join(UPLOADS_DIR, "map.png");
+    if (fs.existsSync(MAP_DATA_FILE) && !fs.existsSync(targetMap)) {
+      const base64 = fs.readFileSync(MAP_DATA_FILE, "utf-8");
+      const base64Data = base64.replace(/^data:image\/\w+;base64,/, "");
+      fs.writeFileSync(targetMap, Buffer.from(base64Data, "base64"));
+      console.log("[Migration] Generated static physical file uploads/map.png from JSON");
+    }
+
+    const targetComm = path.join(UPLOADS_DIR, "community.png");
+    if (fs.existsSync(COMMUNITY_DATA_FILE) && !fs.existsSync(targetComm)) {
+      const base64 = fs.readFileSync(COMMUNITY_DATA_FILE, "utf-8");
+      const base64Data = base64.replace(/^data:image\/\w+;base64,/, "");
+      fs.writeFileSync(targetComm, Buffer.from(base64Data, "base64"));
+      console.log("[Migration] Generated static physical file uploads/community.png from JSON");
+    }
+
+    if (fs.existsSync(GALLERY_DATA_FILE)) {
+      try {
+        const content = fs.readFileSync(GALLERY_DATA_FILE, "utf-8");
+        const galleryData = JSON.parse(content);
+        Object.keys(galleryData).forEach((index) => {
+          const targetGal = path.join(UPLOADS_DIR, `gallery_${index}.png`);
+          if (!fs.existsSync(targetGal)) {
+            const base64 = galleryData[index];
+            const base64Data = base64.replace(/^data:image\/\w+;base64,/, "");
+            fs.writeFileSync(targetGal, Buffer.from(base64Data, "base64"));
+            console.log(`[Migration] Generated static physical file uploads/gallery_${index}.png from JSON`);
+          }
+        });
+      } catch (e) {
+        console.error("[Migration] Failed to migrate gallery JSON to static physical files", e);
+      }
+    }
+  } catch (err) {
+    console.error("[Migration] Unexpected error in JSON migration to physical uploads directory:", err);
+  }
+}
+migrateJsonToUploads();
+
 const REGISTRATIONS_FILE = path.join(process.cwd(), "registrations.json");
 const CONFIG_FILE = path.join(process.cwd(), "sms-config.json");
 
@@ -263,10 +315,6 @@ function writeToStaticAndBuild(fileNamePrefix: string, fileExtension: string, ba
   }
 }
 
-const MAP_DATA_FILE = path.join(process.cwd(), "map-image.json");
-const COMMUNITY_DATA_FILE = path.join(process.cwd(), "community-image.json");
-const GALLERY_DATA_FILE = path.join(process.cwd(), "gallery-images.json");
-
 // GET current map image
 app.get("/api/current-map", (req, res) => {
   try {
@@ -303,6 +351,15 @@ app.post("/api/upload-map", (req, res) => {
     // Save to server data file
     fs.writeFileSync(MAP_DATA_FILE, base64, "utf-8");
 
+    // Save physical binary directly to uploads folder for ultra-fast load caching
+    try {
+      const base64Data = base64.replace(/^data:image\/\w+;base64,/, "");
+      fs.writeFileSync(path.join(UPLOADS_DIR, "map.png"), Buffer.from(base64Data, "base64"));
+      console.log("[Server] Wrote uploaded map to uploads/map.png");
+    } catch (e) {
+      console.error("[Server] Failed to write uploads/map.png:", e);
+    }
+
     // Warm-patch both src images and dist bundled output
     writeToStaticAndBuild("forena_actual_map_png_1779778690378", ".png", base64);
     writeToStaticAndBuild("forena_map_png_1779778008859", ".png", base64);
@@ -323,6 +380,15 @@ app.post("/api/upload-community", (req, res) => {
     }
     // Save to server data file
     fs.writeFileSync(COMMUNITY_DATA_FILE, base64, "utf-8");
+
+    // Save physical binary directly to uploads folder for ultra-fast load caching
+    try {
+      const base64Data = base64.replace(/^data:image\/\w+;base64,/, "");
+      fs.writeFileSync(path.join(UPLOADS_DIR, "community.png"), Buffer.from(base64Data, "base64"));
+      console.log("[Server] Wrote uploaded community map to uploads/community.png");
+    } catch (e) {
+      console.error("[Server] Failed to write uploads/community.png:", e);
+    }
 
     // Warm-patch community images
     writeToStaticAndBuild("forena_community_1779788903164", ".png", base64);
@@ -367,6 +433,15 @@ app.post("/api/upload-gallery", (req, res) => {
 
     galleryData[index] = base64;
     fs.writeFileSync(GALLERY_DATA_FILE, JSON.stringify(galleryData, null, 2), "utf-8");
+
+    // Save physical binary directly to uploads folder for ultra-fast load caching
+    try {
+      const base64Data = base64.replace(/^data:image\/\w+;base64,/, "");
+      fs.writeFileSync(path.join(UPLOADS_DIR, `gallery_${index}.png`), Buffer.from(base64Data, "base64"));
+      console.log(`[Server] Wrote uploaded gallery ${index} to uploads/gallery_${index}.png`);
+    } catch (e) {
+      console.error(`[Server] Failed to write uploads/gallery_${index}.png:`, e);
+    }
 
     res.json({ success: true, message: `Gallery image ${index} uploaded and updated successfully.` });
   } catch (err) {
