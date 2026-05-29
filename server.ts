@@ -274,45 +274,9 @@ app.post("/api/reservations", async (req, res) => {
 
 // Helper to write base64 image data directly to BOTH source assets and compiled dist/assets (warm patch)
 function writeToStaticAndBuild(fileNamePrefix: string, fileExtension: string, base64: string) {
-  try {
-    const base64Data = base64.replace(/^data:image\/\w+;base64,/, "");
-    const binaryData = Buffer.from(base64Data, "base64");
-
-    // 1) Write to source assets (permanent survival)
-    const sourceDir = path.join(process.cwd(), "src/assets/images");
-    if (fs.existsSync(sourceDir)) {
-      const files = fs.readdirSync(sourceDir);
-      const matchedSource = files.filter(f => f.startsWith(fileNamePrefix) && f.endsWith(fileExtension));
-      matchedSource.forEach(file => {
-        const targetPath = path.join(sourceDir, file);
-        try {
-          fs.writeFileSync(targetPath, binaryData);
-          console.log(`[Warm-Patch] Wrote source asset: ${targetPath}`);
-        } catch (e) {
-          console.error(`[Warm-Patch] Failed to write source asset:`, e);
-        }
-      });
-    }
-
-    // 2) Write to compiled assets in dist (instant client update)
-    const distAssetsDir = path.join(process.cwd(), "dist/assets");
-    if (fs.existsSync(distAssetsDir)) {
-      const files = fs.readdirSync(distAssetsDir);
-      // Vite bundles name assets with a hash like filename-hash.extension
-      const matchedFiles = files.filter(f => f.startsWith(fileNamePrefix) && f.endsWith(fileExtension));
-      matchedFiles.forEach(file => {
-        const targetPath = path.join(distAssetsDir, file);
-        try {
-          fs.writeFileSync(targetPath, binaryData);
-          console.log(`[Warm-Patch] Overwrote bundled production asset: ${targetPath}`);
-        } catch (e) {
-          console.error(`[Warm-Patch] Failed to overwrite bundled production asset:`, e);
-        }
-      });
-    }
-  } catch (error) {
-    console.error("[Warm-Patch] Unexpected error:", error);
-  }
+  // Deactivated to prevent corruption of project compile-time template assets in src/assets/images.
+  // Dynamic uploads are safely and reliably isolated inside the /uploads file directory.
+  console.log(`[Warm-Patch Disabled] Resisting modification of original template assets for prefix: ${fileNamePrefix}`);
 }
 
 // GET current map image
@@ -391,6 +355,7 @@ app.post("/api/upload-community", (req, res) => {
     }
 
     // Warm-patch community images
+    writeToStaticAndBuild("forena_community_1780042381071", ".png", base64);
     writeToStaticAndBuild("forena_community_1779788903164", ".png", base64);
     writeToStaticAndBuild("regenerated_image_1779789174361", ".jpg", base64);
 

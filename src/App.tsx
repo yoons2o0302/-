@@ -41,7 +41,7 @@ import {
 } from 'lucide-react';
 
 // @ts-ignore
-import forenaCommunityImg from './assets/images/forena_community_1779788903164.png';
+import forenaCommunityImg from './assets/images/forena_community_1780042381071.png';
 // @ts-ignore
 import regeneratedCommunityImg from './assets/images/regenerated_image_1779789174361.jpg';
 
@@ -70,13 +70,13 @@ const Navbar = ({ transparentLogo }: { transparentLogo: string }) => {
     <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
       isScrolled ? 'bg-white/90 backdrop-blur-md shadow-sm py-2 sm:py-2.5' : 'bg-transparent py-5 sm:py-6'
     }`}>
-      <div className="max-w-full mx-auto px-4 sm:px-8 md:px-12 flex justify-between items-center transition-all duration-300">
-        <a href="/" className="transition-all duration-300 flex items-center justify-start select-none -ml-1 sm:-ml-2 md:-ml-3" style={{ width: '235px', height: '74px' }}>
+      <div className="max-w-full mx-auto px-3 sm:px-8 md:px-12 flex justify-between items-center transition-all duration-300">
+        <a href="/" className="transition-all duration-300 flex items-center justify-start select-none -ml-1 sm:-ml-2 md:-ml-3 w-[105px] min-[360px]:w-[130px] min-[400px]:w-[140px] sm:w-[235px] h-[36px] min-[360px]:h-[44px] min-[400px]:h-[48px] sm:h-[74px]">
           <img 
             src={transparentLogo || forenaLogoWhiteImg} 
             alt="한화포레나" 
             referrerPolicy="no-referrer"
-            className={`h-full w-auto object-contain object-left ml-5 transition-all duration-300 ${
+            className={`h-full w-auto object-contain object-left ml-1 sm:ml-5 transition-all duration-300 ${
               isScrolled ? 'brightness-0 contrast-150' : 'brightness-100'
             } ${!transparentLogo && 'opacity-0'}`} 
           />
@@ -84,7 +84,7 @@ const Navbar = ({ transparentLogo }: { transparentLogo: string }) => {
 
         {/* Desktop Nav */}
         <div className="hidden md:flex space-x-12 items-center">
-          {navLinks.map((link) => (
+          {navLinks.map((link, idx) => (
             <a 
               key={link.name} 
               href={link.href} 
@@ -98,28 +98,28 @@ const Navbar = ({ transparentLogo }: { transparentLogo: string }) => {
         </div>
 
         {/* Brand Contact & Mobile Toggle */}
-        <div className="flex items-center space-x-6">
+        <div className="flex items-center space-x-1.5 sm:space-x-6 shrink-0">
           <a 
             href="tel:1688-9698" 
-            className={`flex items-center gap-2 font-extrabold transition-all text-base sm:text-2xl ${
+            className={`flex items-center gap-0.5 sm:gap-2 font-extrabold transition-all text-[11px] min-[340px]:text-[12.5px] min-[380px]:text-sm sm:text-2xl whitespace-nowrap shrink-0 ${
               isScrolled 
                 ? 'text-primary hover:text-primary/80' 
                 : 'text-white hover:text-white/90'
             }`}
           >
-            <Phone className="w-5 h-5 fill-current shrink-0" />
-            <span className="font-mono tracking-tighter">1688-9698</span>
+            <Phone className="w-3 h-3 sm:w-5 sm:h-5 fill-current shrink-0" />
+            <span className="font-mono tracking-tighter whitespace-nowrap">1688-9698</span>
           </a>
 
           {/* Mobile Toggle */}
           <button 
-            className="md:hidden"
+            className="md:hidden p-1"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? (
-              <X className={isScrolled ? 'text-gray-900' : 'text-white'} />
+              <X className={isScrolled ? 'text-gray-900 w-5 h-5' : 'text-white w-5 h-5'} />
             ) : (
-              <Menu className={isScrolled ? 'text-gray-900' : 'text-white'} />
+              <Menu className={isScrolled ? 'text-gray-900 w-5 h-5' : 'text-white w-5 h-5'} />
             )}
           </button>
         </div>
@@ -879,6 +879,10 @@ const Gallery = () => {
 
 
 
+                
+
+
+
               </div>
             </div>
   
@@ -928,6 +932,10 @@ const Gallery = () => {
                         onClick={() => setSelectedImage(img.url)}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 select-none cursor-pointer" 
                       />
+
+
+
+
 
 
 
@@ -1254,7 +1262,10 @@ const RentalSection = () => {
         {/* "민간임대아파트의 특별함" - High-Fidelity Grid Display representing the special features of private rental apartments */}
         <div className="max-w-5xl mx-auto mt-12 mb-12">
           <div className="text-center mb-10">
-            <h3 className="text-2xl md:text-[34px] font-extrabold text-[#ce7200] flex items-center justify-center gap-2 select-none">
+            <h3 
+              style={{ color: '#363b74' }}
+              className="text-2xl md:text-[34px] font-extrabold flex items-center justify-center gap-2 select-none"
+            >
               <span className="w-8 h-[2px] bg-amber-500 hidden sm:inline-block"></span>
               민간임대아파트의 특별함
               <span className="w-8 h-[2px] bg-amber-500 hidden sm:inline-block"></span>
@@ -1275,23 +1286,26 @@ const RentalSection = () => {
                   className="bg-white rounded-lg p-3 sm:p-5 border border-gray-150 shadow-xs flex flex-col justify-between transition-all duration-300 relative overflow-hidden text-left"
                 >
                   {/* Accent subtle line */}
-                  <div className="absolute top-0 left-0 right-0 h-1 bg-amber-500" />
+                  <div 
+                    className="absolute top-0 left-0 right-0 h-1" 
+                    style={{ backgroundColor: '#363b74' }}
+                  />
                   
                   <div>
                     <div className="flex items-center gap-1.5 sm:gap-3 mb-2 sm:mb-4">
                       <div className={`p-1.5 sm:p-2 rounded-lg border ${feature.color} flex items-center justify-center`}>
                         <IconComp className="w-4 h-4 sm:w-5 sm:h-5" />
                       </div>
-                      <span className="text-[9px] sm:text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200/50 px-1 sm:px-2 py-0.5 rounded-xs select-none">
-                        SPECIAL
-                      </span>
                     </div>
                     
                     <h4 className="text-sm sm:text-[17px] md:text-[18px] font-extrabold text-[#0d1f38] mb-1 sm:mb-1.5 tracking-tight">
                       {feature.title}
                     </h4>
                     
-                    <p className="font-extrabold text-[#ce7200] text-xs sm:text-[14px] md:text-[15px] leading-snug">
+                    <p 
+                      style={{ color: '#2e3694' }}
+                      className="font-extrabold text-xs sm:text-[14px] md:text-[15px] leading-snug"
+                    >
                       {feature.description}
                     </p>
                   </div>
@@ -1314,76 +1328,121 @@ export default function App() {
   const [isSmsConfigOpen, setIsSmsConfigOpen] = useState(false);
   const [isMapZoomOpen, setIsMapZoomOpen] = useState(false);
   const [mapImageSrc, setMapImageSrc] = useState<string>(() => {
-    const local = localStorage.getItem('forena_map_image');
-    if (local) return local;
-    return forenaMapImg;
+    const localMap = localStorage.getItem('forena_map_image');
+    return (localMap && localMap.length > 1000) ? localMap : forenaMapImg;
   });
   const [communityImageSrc, setCommunityImageSrc] = useState<string>(() => {
-    const local = localStorage.getItem('forena_community_image');
-    if (local) return local;
-    return forenaCommunityImg;
+    const localComm = localStorage.getItem('forena_community_image');
+    return (localComm && localComm.length > 1000) ? localComm : forenaCommunityImg;
   });
   const [isUploadingCommunity, setIsUploadingCommunity] = useState(false);
   const [transparentLogo, setTransparentLogo] = useState<string>('');
 
-  // 태블릿 및 모바일 기기에서도 화면 전체가 깨지지 않고 데스크톱 비율 그대로 유지 및 축소되도록 뷰포트 배율 설정
-  useEffect(() => {
-    const handleViewport = () => {
-      const minWidth = 1200; // 최대 레이아웃 가로 사이즈에 맞춰 1200px 기준 설정
-      const viewportMeta = document.querySelector('meta[name="viewport"]');
-      if (!viewportMeta) return;
+  const handleMapImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-      if (window.screen.width < minWidth) {
-        const scale = window.screen.width / minWidth;
-        viewportMeta.setAttribute(
-          'content',
-          `width=${minWidth}, initial-scale=${scale}, minimum-scale=${scale}, maximum-scale=3.0, user-scalable=yes`
-        );
-      } else {
-        viewportMeta.setAttribute(
-          'content',
-          'width=device-width, initial-scale=1.0'
-        );
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const base64 = reader.result as string;
+      localStorage.setItem('forena_map_image', base64);
+      setMapImageSrc(base64);
+
+      try {
+        const response = await fetch('/api/upload-map', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ base64 })
+        });
+        const result = await response.json();
+        if (!result.success) {
+          console.error('Map saving failed:', result.error);
+        }
+      } catch (err) {
+        console.error('API map upload error:', err);
       }
     };
+    reader.readAsDataURL(file);
+  };
 
-    handleViewport();
-    window.addEventListener('resize', handleViewport);
-    return () => {
-      window.removeEventListener('resize', handleViewport);
+  const handleCommunityImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const base64 = reader.result as string;
+      localStorage.setItem('forena_community_image', base64);
+      setCommunityImageSrc(base64);
+
+      try {
+        const response = await fetch('/api/upload-community', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ base64 })
+        });
+        const result = await response.json();
+        if (!result.success) {
+          console.error('Community saving failed:', result.error);
+        }
+      } catch (err) {
+        console.error('API community upload error:', err);
+      }
     };
+    reader.readAsDataURL(file);
+  };
+
+  // 모바일 기기에서 표준 반응형 최적화 비율(width=device-width)로 깨짐 없이 깔끔하게 나오도록 설정
+  useEffect(() => {
+    const viewportMeta = document.querySelector('meta[name="viewport"]');
+    if (viewportMeta) {
+      viewportMeta.setAttribute(
+        'content',
+        'width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes'
+      );
+    }
   }, []);
 
   useEffect(() => {
-    // Fetch custom map from server if it exists
-    fetch("/api/current-map")
-      .then((res) => {
-        if (!res.ok) throw new Error("HTTP error");
-        return res.json();
-      })
-      .then((data) => {
-        if (data.success && data.base64) {
-          setMapImageSrc(data.base64);
-          localStorage.setItem('forena_map_image', data.base64);
-        }
-      })
-      .catch((err) => console.log("Note: API server load map fallback used.", err));
+    // 1. Instantly check the browser's local storage first which is our source of truth
+    const localMap = localStorage.getItem('forena_map_image');
+    if (localMap && localMap.length > 1000) {
+      setMapImageSrc(localMap);
+    } else {
+      // 2. Fall back to server if local storage is empty
+      fetch("/api/current-map")
+        .then((res) => {
+          if (!res.ok) throw new Error("HTTP error");
+          return res.json();
+        })
+        .then((data) => {
+          if (data.success && data.base64) {
+            setMapImageSrc(data.base64);
+          }
+        })
+        .catch((err) => console.log("Note: API server load map fallback used.", err));
+    }
   }, []);
 
   useEffect(() => {
-    // Fetch custom community map from server if it exists
-    fetch("/api/current-community")
-      .then((res) => {
-        if (!res.ok) throw new Error("HTTP error");
-        return res.json();
-      })
-      .then((data) => {
-        if (data.success && data.base64) {
-          setCommunityImageSrc(data.base64);
-          localStorage.setItem('forena_community_image', data.base64);
-        }
-      })
-      .catch((err) => console.log("Note: API server load community fallback used.", err));
+    // 1. Instantly check the browser's local storage first which is our source of truth
+    const localComm = localStorage.getItem('forena_community_image');
+    if (localComm && localComm.length > 1000) {
+      setCommunityImageSrc(localComm);
+    } else {
+      // 2. Fall back to server if local storage is empty
+      fetch("/api/current-community")
+        .then((res) => {
+          if (!res.ok) throw new Error("HTTP error");
+          return res.json();
+        })
+        .then((data) => {
+          if (data.success && data.base64) {
+            setCommunityImageSrc(data.base64);
+          }
+        })
+        .catch((err) => console.log("Note: API server load community fallback used.", err));
+    }
   }, []);
 
   // [Auto Sync] If this browser has custom images in localStorage, safely push/sync them back to the server.
@@ -1421,7 +1480,7 @@ export default function App() {
       }
 
       // 3. Sync Gallery Images
-      for (let i = 0; i < 8; i++) {
+      for (let i = 0; i < 9; i++) {
         const localGal = localStorage.getItem(`forena_gallery_${i}`);
         if (localGal && !localGal.startsWith('http') && localGal.length > 1000) {
           try {
@@ -1441,7 +1500,7 @@ export default function App() {
     // Run backup upload if any uploaded key exists in browser local storage
     const hasMap = localStorage.getItem('forena_map_image');
     const hasComm = localStorage.getItem('forena_community_image');
-    const hasGal = localStorage.getItem('forena_gallery_0') || localStorage.getItem('forena_gallery_1');
+    const hasGal = localStorage.getItem('forena_gallery_0') || localStorage.getItem('forena_gallery_1') || localStorage.getItem('forena_gallery_8');
     if (hasMap || hasComm || hasGal) {
       const timer = setTimeout(syncLocalToServer, 2000);
       return () => clearTimeout(timer);
@@ -1521,6 +1580,7 @@ export default function App() {
           onClick={() => setIsMapZoomOpen(true)}
           className="relative mb-20 bg-white/50 backdrop-blur-xs p-4 sm:p-6 md:p-8 rounded-sm shadow-xl border border-gray-100 max-w-5xl mx-auto overflow-hidden group cursor-pointer"
         >
+
           <img 
             src={mapImageSrc} 
             alt="한화포레나 인천학익 광역입지도" 
@@ -1641,6 +1701,7 @@ export default function App() {
               className="lg:col-span-7 flex justify-center w-full"
             >
               <div className="relative w-full max-w-2xl bg-gray-50 rounded-xs overflow-hidden shadow-xl border border-gray-200 p-3 hover:shadow-primary/5 transition-all duration-300 group">
+
                 <img 
                   src={communityImageSrc} 
                   alt="한화포레나 인천학익 커뮤니티 시설 동호수 및 3D 입체 투시도" 
