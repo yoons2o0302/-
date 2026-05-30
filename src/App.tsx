@@ -11,6 +11,24 @@ import forenaHeroImg from './assets/images/forena_hero_1779703103564.png';
 import forenaMapImg from './assets/images/forena_actual_map_png_1779778690378.png';
 // @ts-ignore
 import forenaLogoWhiteImg from './assets/images/forena_logo_white_1779779726508.png';
+// @ts-ignore
+import forenaGallery0 from './assets/images/forena_gallery_0.jpg';
+// @ts-ignore
+import forenaGallery1 from './assets/images/forena_gallery_1.jpg';
+// @ts-ignore
+import forenaGallery2 from './assets/images/forena_gallery_2.jpg';
+// @ts-ignore
+import forenaGallery3 from './assets/images/forena_gallery_3.jpg';
+// @ts-ignore
+import forenaGallery4 from './assets/images/forena_gallery_4.jpg';
+// @ts-ignore
+import forenaGallery5 from './assets/images/forena_gallery_5.jpg';
+// @ts-ignore
+import forenaGallery6 from './assets/images/forena_gallery_6.jpg';
+// @ts-ignore
+import forenaGallery7 from './assets/images/forena_gallery_7.jpg';
+// @ts-ignore
+import forenaGallery8 from './assets/images/forena_gallery_8.png';
 import { 
   Building2, 
   MapPin, 
@@ -702,39 +720,39 @@ const SectionHeading = ({ subtitle, title, centered = false, className = "mb-16"
 
 const DEFAULT_IMAGES = [
   { 
-    url: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=1200&auto=format&fit=crop", 
+    url: forenaGallery0, 
     title: "거실 (Living Space)" 
   },
   { 
-    url: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?q=80&w=1200&auto=format&fit=crop", 
+    url: forenaGallery1, 
     title: "공동 주방 (Kitchen)" 
   },
   { 
-    url: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?q=80&w=1200&auto=format&fit=crop", 
+    url: forenaGallery2, 
     title: "침실 (Master Bedroom)" 
   },
   { 
-    url: "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?q=80&w=1200&auto=format&fit=crop", 
+    url: forenaGallery3, 
     title: "욕실 (Bathroom)" 
   },
   { 
-    url: "https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?q=80&w=1200&auto=format&fit=crop", 
+    url: forenaGallery4, 
     title: "파우더룸 (Powder Room)" 
   },
   { 
-    url: "https://images.unsplash.com/photo-1558882224-cca166733360?q=80&w=1200&auto=format&fit=crop", 
+    url: forenaGallery5, 
     title: "드레스룸 (Dress Room)" 
   },
   { 
-    url: "https://images.unsplash.com/photo-1600607687644-c7171b42498f?q=80&w=1100&auto=format&fit=crop", 
+    url: forenaGallery6, 
     title: "발코니 (Private Balcony)" 
   },
   { 
-    url: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?q=80&w=1200&auto=format&fit=crop", 
+    url: forenaGallery7, 
     title: "서재 (Study Room)" 
   },
   { 
-    url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200&auto=format&fit=crop", 
+    url: forenaGallery8, 
     title: "워크인 현관 (Entrance)" 
   }
 ];
@@ -1206,49 +1224,49 @@ const RentalSection = () => {
       description: "거주 중 다른 아파트 청약가능",
       detail: "임차 자격으로 실제 거주하는 기간 내내 청약자격이나 기존 청약통장 가점 등이 온전히 보호되어 다른 공급 청약에 지장이 없습니다.",
       icon: ShieldCheck,
-      color: "bg-[#ecfdf5] text-[#059669] border-[#a7f3d0]",
+      color: "bg-[#eff6ff] text-[#2563eb] border-[#bfdbfe]",
     },
     {
       title: "주택수 미포함",
       description: "1가구 2주택 미포함",
       detail: "보유 자산에 직결되는 주택수 산정에 미포함되므로, 다주택 규제 저촉이나 관련 금융 및 세무상 불이익 걱정이 완벽히 해소됩니다.",
       icon: Building2,
-      color: "bg-[#f5f3ff] text-[#7c3aed] border-[#ddd6fe]",
+      color: "bg-[#eff6ff] text-[#2563eb] border-[#bfdbfe]",
     },
     {
       title: "이사걱정 無",
       description: "10년 동안 내 집처럼 거주 가능",
       detail: "임대인 임의 인상 리스크 없이 최소 10년 동안 장기적으로 안정된 주평을 보장받아 내 집처럼 안심하고 오랫동안 거주할 수 있습니다.",
       icon: Key,
-      color: "bg-[#fff7ed] text-[#ea580c] border-[#ffedd5]",
+      color: "bg-[#eff6ff] text-[#2563eb] border-[#bfdbfe]",
     },
     {
       title: "세금 부담 없음",
       description: "취득세, 재산세, 종부세, 양도세 없음",
       detail: "취인 등기가 나지 않는 임차인 지위 조건으로 소유 시 매년 누적 부과되는 재산세, 종합부동산세, 양도소득세 등이 전액 면제됩니다.",
       icon: Coins,
-      color: "bg-[#fdf2f8] text-[#db2777] border-[#fbcfe8]",
+      color: "bg-[#eff6ff] text-[#2563eb] border-[#bfdbfe]",
     },
     {
       title: "유주택자 가능",
       description: "주택소유여부, 소득수준에 제한 없음",
       detail: "기존에 소유하고 계신 주택이 있어도 무관하며, 청약 문턱 역할을 하는 복잡한 세대소득 및 가구 자산 제한이 일체 적용되지 않습니다.",
       icon: UserCheck,
-      color: "bg-[#faf5ff] text-[#9333ea] border-[#f3e8ff]",
+      color: "bg-[#eff6ff] text-[#2563eb] border-[#bfdbfe]",
     },
     {
       title: "전매 가능",
       description: "전매 제한이 없어 자유롭게 전매가능",
       detail: "별도 소유권 보호에 지장 없는 지위 전매/계약 명의 변경에 법령상 규제가 적용되지 않아, 거래 상황에 맞춰 뛰어난 환금성을 제공합니다.",
       icon: RefreshCw,
-      color: "bg-[#f0fdf4] text-[#16a34a] border-[#dcfce7]",
+      color: "bg-[#eff6ff] text-[#2563eb] border-[#bfdbfe]",
     },
     {
       title: "전대 가능",
       description: "재임대를 통한 임대수익 창출가능",
       detail: "사유에 무조건 구애받지 않고 단지 소관 합의/승인을 통해 합법적인 타인 재임대(전대)가 가능하므로 훌륭한 매월 임대 가치를 창출합니다.",
       icon: DollarSign,
-      color: "bg-[#fefce8] text-[#ca8a04] border-[#fef9c3]",
+      color: "bg-[#eff6ff] text-[#2563eb] border-[#bfdbfe]",
     },
   ];
 
