@@ -891,6 +891,12 @@ const Gallery = () => {
                   alt={images[0]?.title || DEFAULT_IMAGES[0].title} 
                   draggable="false"
                   onClick={() => setSelectedImage(images[0]?.url || DEFAULT_IMAGES[0].url)}
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (target.src !== DEFAULT_IMAGES[0].url) {
+                      target.src = DEFAULT_IMAGES[0].url;
+                    }
+                  }}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 select-none" 
                 />
                 
@@ -948,6 +954,12 @@ const Gallery = () => {
                         alt={img.title} 
                         draggable="false"
                         onClick={() => setSelectedImage(img.url)}
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          if (target.src !== DEFAULT_IMAGES[originalIndex].url) {
+                            target.src = DEFAULT_IMAGES[originalIndex].url;
+                          }
+                        }}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 select-none cursor-pointer" 
                       />
 
@@ -1604,7 +1616,7 @@ export default function App() {
             alt="한화포레나 인천학익 광역입지도" 
             referrerPolicy="no-referrer"
             onError={() => {
-              if (mapImageSrc === "/uploads/map.png") {
+              if (mapImageSrc !== forenaMapImg) {
                 setMapImageSrc(forenaMapImg);
               }
             }}
@@ -1725,7 +1737,7 @@ export default function App() {
                   alt="한화포레나 인천학익 커뮤니티 시설 동호수 및 3D 입체 투시도" 
                   referrerPolicy="no-referrer"
                   onError={() => {
-                    if (communityImageSrc === "/uploads/community.png") {
+                    if (communityImageSrc !== forenaCommunityImg) {
                       setCommunityImageSrc(forenaCommunityImg);
                     }
                   }}
@@ -1769,7 +1781,7 @@ export default function App() {
                 src={mapImageSrc} 
                 alt="한화포레나 인천학익 광역입지도 크게 보기"
                 onError={() => {
-                  if (mapImageSrc === "/uploads/map.png") {
+                  if (mapImageSrc !== forenaMapImg) {
                     setMapImageSrc(forenaMapImg);
                   }
                 }}
