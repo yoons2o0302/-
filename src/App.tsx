@@ -1475,65 +1475,18 @@ export default function App() {
     }
   }, []);
 
-  // [Auto Sync] If this browser has custom images in localStorage, safely push/sync them back to the server.
-  // This guarantees that any container restarts do not break the fallback state for other shared/public visitors.
+  // One-time cache reset to force-load the new, beautiful default assets and resolve caching issues
   useEffect(() => {
-    const syncLocalToServer = async () => {
-      console.log("[Auto-Sync] Synchronizing custom browser images to server...");
-
-      // 1. Sync Map Image
-      const localMap = localStorage.getItem('forena_map_image');
-      if (localMap && !localMap.startsWith('http') && localMap.length > 1000) {
-        try {
-          await fetch('/api/upload-map', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ base64: localMap })
-          });
-        } catch (e) {
-          console.error('[Auto-Sync] Failed to sync map:', e);
-        }
-      }
-
-      // 2. Sync Community Image
-      const localComm = localStorage.getItem('forena_community_image');
-      if (localComm && !localComm.startsWith('http') && localComm.length > 1000) {
-        try {
-          await fetch('/api/upload-community', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ base64: localComm })
-          });
-        } catch (e) {
-          console.error('[Auto-Sync] Failed to sync community:', e);
-        }
-      }
-
-      // 3. Sync Gallery Images
+    const isReset = localStorage.getItem('forena_cache_reset_v4');
+    if (isReset !== 'true') {
+      localStorage.removeItem('forena_map_image');
+      localStorage.removeItem('forena_community_image');
       for (let i = 0; i < 9; i++) {
-        const localGal = localStorage.getItem(`forena_gallery_${i}`);
-        if (localGal && !localGal.startsWith('http') && localGal.length > 1000) {
-          try {
-            await fetch('/api/upload-gallery', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ index: i, base64: localGal })
-            });
-          } catch (e) {
-            console.error(`[Auto-Sync] Failed to sync gallery image #${i}:`, e);
-          }
-        }
+        localStorage.removeItem(`forena_gallery_${i}`);
       }
-      console.log("[Auto-Sync] Synchronization complete. Images are now persistent on server.");
-    };
-
-    // Run backup upload if any uploaded key exists in browser local storage
-    const hasMap = localStorage.getItem('forena_map_image');
-    const hasComm = localStorage.getItem('forena_community_image');
-    const hasGal = localStorage.getItem('forena_gallery_0') || localStorage.getItem('forena_gallery_1') || localStorage.getItem('forena_gallery_8');
-    if (hasMap || hasComm || hasGal) {
-      const timer = setTimeout(syncLocalToServer, 2000);
-      return () => clearTimeout(timer);
+      localStorage.setItem('forena_cache_reset_v4', 'true');
+      console.log('One-time client image cache cleared to load fresh assets.');
+      window.location.reload();
     }
   }, []);
 
