@@ -404,8 +404,11 @@ const ReservationModal = ({ isOpen, onClose }: ReservationModalProps) => {
   );
 };
 
-// Masked SmsConfigModal for Admin setup
+// Masked SmsConfigModal for Admin setup (Integrated Admin Panel)
 const SmsConfigModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const [activeTab, setActiveTab] = useState<'sms' | 'represent' | 'gallery'>('sms');
+  
+  // SOLAPI state
   const [recipient, setRecipient] = useState('');
   const [apiKey, setApiKey] = useState('');
   const [apiSecret, setApiSecret] = useState('');
@@ -415,11 +418,18 @@ const SmsConfigModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
+  // Image URLs state
+  const [mapImageUrl, setMapImageUrl] = useState('');
+  const [communityImageUrl, setCommunityImageUrl] = useState('');
+  const [galleryUrls, setGalleryUrls] = useState<string[]>(Array(9).fill(''));
+
   useEffect(() => {
     if (isOpen) {
       setLoading(true);
       setError('');
       setMessage('');
+      
+      // 1. Load SOLAPI settings from server
       fetch('/api/sms-config')
         .then(res => res.json())
         .then(result => {
@@ -432,15 +442,25 @@ const SmsConfigModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
         })
         .catch(err => {
           console.error(err);
-          setError('설정을 불러오는 중 오류가 발생했습니다.');
+          setError('서버 SMS 설정을 불러오는 중 오류가 발생했습니다.');
         })
         .finally(() => {
           setLoading(false);
         });
+
+      // 2. Load Image URLs from localStorage
+      setMapImageUrl(localStorage.getItem('forena_map_image') || '');
+      setCommunityImageUrl(localStorage.getItem('forena_community_image') || '');
+      
+      const loadedGallery: string[] = [];
+      for (let i = 0; i < 9; i++) {
+        loadedGallery.push(localStorage.getItem(`forena_gallery_${i}`) || '');
+      }
+      setGalleryUrls(loadedGallery);
     }
   }, [isOpen]);
 
-  const handleSave = async (e: React.FormEvent) => {
+  const handleSaveSms = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setError('');
@@ -481,6 +501,64 @@ const SmsConfigModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
     }
   };
 
+  const handleSaveImages = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Save map image
+    if (mapImageUrl.trim()) {
+      localStorage.setItem('forena_map_image', mapImageUrl.trim());
+    } else {
+      localStorage.removeItem('forena_map_image');
+    }
+    
+    // Save community image
+    if (communityImageUrl.trim()) {
+      localStorage.setItem('forena_community_image', communityImageUrl.trim());
+    } else {
+      localStorage.removeItem('forena_community_image');
+    }
+    
+    // Save gallery images
+    galleryUrls.forEach((url, i) => {
+      if (url.trim()) {
+        localStorage.setItem(`forena_gallery_${i}`, url.trim());
+      } else {
+        localStorage.removeItem(`forena_gallery_${i}`);
+      }
+    });
+    
+    setMessage('🎉 사진 주소 설정이 완벽하게 저장되었습니다! 즉각적인 반영을 위해 잠시 후 화면이 자동으로 새로고침됩니다.');
+    setTimeout(() => {
+      window.location.reload();
+    }, 1200);
+  };
+
+  const handleResetToDefault = () => {
+    if (window.confirm('모든 사용자 지정 이미지 주소를 지우고 사이트 기본 포레나 원본 이미지로 복구할까요?')) {
+      localStorage.removeItem('forena_map_image');
+      localStorage.removeItem('forena_community_image');
+      for (let i = 0; i < 9; i++) {
+        localStorage.removeItem(`forena_gallery_${i}`);
+      }
+      setMessage('🔄 이미지 주소 연동 정보가 즉시 공장 초기화되었습니다. 잠시 후 재로딩합니다.');
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    }
+  };
+
+  const GALLERY_TITLES = [
+    "1번 촬영지: 거실 (Living Space)",
+    "2번 촬영지: 주방/다이닝룸",
+    "3번 촬영지: 스마트 안방 (Bed Room)",
+    "4번 촬영지: 프리미엄 드레스룸",
+    "5번 촬영지: 월패드 및 스마트 홈제어",
+    "6번 촬영지: 다용도 드레스룸 & 수납장",
+    "7번 촬영지: 빌트인 하이테크 가전 (주방)",
+    "8번 촬영지: 독립 서재/공부방 아치룸",
+    "9번 촬영지: 대형 현관 팬트리"
+  ];
+
   if (!isOpen) return null;
 
   return (
@@ -489,95 +567,240 @@ const SmsConfigModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
       <div className="absolute inset-0 bg-black/60 backdrop-blur-xs" onClick={onClose} />
       
       {/* Modal Card */}
-      <div className="relative bg-white border border-gray-100 shadow-2xl max-w-md w-full rounded-sm p-6 overflow-hidden z-[210]">
+      <div className="relative bg-white border border-gray-100 shadow-2xl max-w-2xl w-full rounded-sm p-6 overflow-hidden z-[210] flex flex-col max-h-[90vh]">
         <button 
           onClick={onClose}
           type="button"
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
         >
           <X className="w-6 h-6" />
         </button>
 
-        <div className="flex items-center gap-2 mb-6 border-b border-gray-100 pb-3">
+        <div className="flex items-center gap-2 mb-4 border-b border-gray-100 pb-3">
           <Settings className="w-5 h-5 text-primary" />
-          <h3 className="font-bold text-lg text-gray-900">관리자 SMS 알림 설정 (솔라피)</h3>
+          <h3 className="font-extrabold text-lg text-gray-950">사이트 통합 관리자 설정</h3>
         </div>
 
-        {loading ? (
-          <div className="py-12 text-center text-gray-500 font-medium">설정을 불러오는 중입니다...</div>
-        ) : (
-          <form onSubmit={handleSave} className="space-y-4 text-left">
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-700 block">🔔 수신할 휴대폰 번호 (예약 문자 받을 번호)</label>
-              <input 
-                type="text" 
-                required 
-                placeholder="010-8875-3274"
-                value={recipient}
-                onChange={(e) => setRecipient(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-200 outline-none focus:border-primary text-sm font-mono"
-              />
-            </div>
+        {/* Tab Controls */}
+        <div className="flex border-b border-gray-200 mb-4 text-xs sm:text-sm">
+          <button
+            type="button"
+            onClick={() => { setActiveTab('sms'); setMessage(''); setError(''); }}
+            className={`flex-1 py-2 text-center font-extrabold border-b-2 transition-all cursor-pointer ${
+              activeTab === 'sms' 
+                ? 'border-primary text-primary' 
+                : 'border-transparent text-gray-500 hover:text-gray-800'
+            }`}
+          >
+            💬 SMS 문자 알림 연동
+          </button>
+          <button
+            type="button"
+            onClick={() => { setActiveTab('represent'); setMessage(''); setError(''); }}
+            className={`flex-1 py-2 text-center font-extrabold border-b-2 transition-all cursor-pointer ${
+              activeTab === 'represent' 
+                ? 'border-primary text-primary' 
+                : 'border-transparent text-gray-500 hover:text-gray-800'
+            }`}
+          >
+            🖼️ 입지도/커뮤니티 관리
+          </button>
+          <button
+            type="button"
+            onClick={() => { setActiveTab('gallery'); setMessage(''); setError(''); }}
+            className={`flex-1 py-2 text-center font-extrabold border-b-2 transition-all cursor-pointer ${
+              activeTab === 'gallery' 
+                ? 'border-primary text-primary' 
+                : 'border-transparent text-gray-500 hover:text-gray-800'
+            }`}
+          >
+            📷 세대 갤러리 관리 (9장)
+          </button>
+        </div>
 
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-700 block">🔑 솔라피 API Key</label>
-              <input 
-                type="text" 
-                placeholder="NCSXXXXXXXXXXXXX"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-200 outline-none focus:border-primary text-sm font-mono"
-              />
-            </div>
+        <div className="flex-1 overflow-y-auto pr-1 text-left pb-4">
+          {loading ? (
+            <div className="py-12 text-center text-gray-500 font-bold">인프라 설정을 안전하게 로드해오는 중입니다...</div>
+          ) : (
+            <>
+              {error && (
+                <p className="mb-4 text-xs text-red-500 font-semibold bg-red-50 p-2.5 rounded-sm border border-red-100 text-center">{error}</p>
+              )}
+              {message && (
+                <p className="mb-4 text-xs text-green-600 font-semibold bg-green-50 p-2.5 rounded-sm border border-green-100 text-center">{message}</p>
+              )}
 
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-700 block">🔒 솔라피 API Secret</label>
-              <input 
-                type="password" 
-                placeholder="보안 처리되는 비밀키"
-                value={apiSecret}
-                onChange={(e) => setApiSecret(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-200 outline-none focus:border-primary text-sm font-mono"
-              />
-            </div>
+              {activeTab === 'sms' && (
+                <form onSubmit={handleSaveSms} className="space-y-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-gray-700 block">🔔 수신할 휴대폰 번호 (방문 서류 예약 발생 시 직접 알림 문자 수신)</label>
+                    <input 
+                      type="text" 
+                      required 
+                      placeholder="예시: 010-8875-3274"
+                      value={recipient}
+                      onChange={(e) => setRecipient(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-200 outline-none focus:border-primary text-sm font-mono"
+                    />
+                  </div>
 
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-700 block">📞 솔라피 발신 번호 (등록 완료한 발신인 핸드폰 번호)</label>
-              <input 
-                type="text" 
-                placeholder="01088753274"
-                value={sender}
-                onChange={(e) => setSender(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-200 outline-none focus:border-primary text-sm font-mono"
-              />
-            </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-gray-700 block">🔑 솔라피 API Key</label>
+                      <input 
+                        type="text" 
+                        placeholder="NCSXXXXXXXXXXXXX"
+                        value={apiKey}
+                        onChange={(e) => setApiKey(e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-200 outline-none focus:border-primary text-xs font-mono"
+                      />
+                    </div>
 
-            <div className="p-3 bg-blue-50 border border-blue-100 text-blue-700 text-xs rounded-xs leading-relaxed space-y-1 mt-2">
-              <p className="font-semibold">&#x1F4DD; 솔라피 연동 안내 문서:</p>
-              <ul className="list-disc pl-4 space-y-0.5">
-                <li>솔라피 홈페이지 로그인 후 <b>API Key 관리</b> 메뉴에서 발급받은 키를 입력해주세요.</li>
-                <li><b>발신번호 관리</b> 메뉴에서 보낼 핸드폰 번호(발신자)를 등록 후 똑같이 입력하셔야 정상 전송됩니다.</li>
-                <li>본 연동이 완료되면, 고객이 사전 예약을 제출하는 즉시 지정하신 <b>수신 번호로 즉각 알림 문자</b>가 전송됩니다.</li>
-              </ul>
-            </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-gray-700 block">🔒 솔라피 API Secret</label>
+                      <input 
+                        type="password" 
+                        placeholder="전송 비밀 암호키"
+                        value={apiSecret}
+                        onChange={(e) => setApiSecret(e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-200 outline-none focus:border-primary text-xs font-mono"
+                      />
+                    </div>
+                  </div>
 
-            {message && (
-              <p className="text-xs text-green-600 font-semibold bg-green-50 p-2 rounded-xs border border-green-100 text-center">{message}</p>
-            )}
-            
-            {error && (
-              <p className="text-xs text-red-500 font-semibold bg-red-50 p-2 rounded-xs border border-red-100 text-center">{error}</p>
-            )}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-gray-700 block">📞 솔라피 발신 번호 (솔라피 관리자 사이트에 등록한 보낼 핸드폰 번호)</label>
+                    <input 
+                      type="text" 
+                      placeholder="01088753274 (기호 없이)"
+                      value={sender}
+                      onChange={(e) => setSender(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-200 outline-none focus:border-primary text-sm font-mono"
+                    />
+                  </div>
 
-            <button 
-              type="submit" 
-              disabled={saving}
-              className="w-full mt-4 py-3 bg-[var(--color-primary)] hover:bg-[#32275d] text-white font-bold text-sm tracking-wide transition-all text-center rounded-xs disabled:opacity-50"
-            >
-              {saving ? '저장 중...' : '솔라피 설정 저장 완료하기'}
-            </button>
-          </form>
-        )}
+                  <div className="p-3 bg-blue-50/70 border border-blue-100 text-blue-700 text-xs rounded-sm leading-relaxed space-y-1">
+                    <p className="font-extrabold">&#x1F4DD; 솔라피 실시간 예약 연동 안내:</p>
+                    <ul className="list-disc pl-4 space-y-0.5 font-medium">
+                      <li>인터넷 문자대행 서비스인 <b>솔라피(Solapi)</b>에 가입 후 발급 받으신 키 컬렉션을 그대로 옮겨 적어줍니다.</li>
+                      <li>휴대폰 본인 인증 등을 거친 번호(보낼 발신 번호)를 정확히 입력하셔야 이동통신 사별 수신 제약 없이 최속도로 발송 완료됩니다.</li>
+                      <li>모든 연동 완료 후 고객님이 대표 홈페이지에서 상담 예약을 클릭-기록하시는 순간 지정된 수신 번호의 기기로 실시간 양방향 문자가 입수됩니다.</li>
+                    </ul>
+                  </div>
+
+                  <button 
+                    type="submit" 
+                    disabled={saving}
+                    className="w-full py-3 bg-[#0d1f38] hover:bg-[#32275d] text-white font-extrabold text-xs sm:text-sm tracking-wide transition-all text-center rounded-sm disabled:opacity-50 cursor-pointer"
+                  >
+                    {saving ? '서버와 안전하게 공유 중...' : '솔라피(Solapi) 실시간 자동 알림 연동 저장 완료'}
+                  </button>
+                </form>
+              )}
+
+              {activeTab === 'represent' && (
+                <form onSubmit={handleSaveImages} className="space-y-4">
+                  <div className="p-3 bg-amber-50 border border-amber-100 text-amber-900 text-xs rounded-sm leading-relaxed mb-1">
+                    <p className="font-extrabold">💡 넷리파이(Netlify) / 버셀(Vercel) 등록 사진 실시간 연결 규칙:</p>
+                    <p className="mt-1 font-semibold leading-relaxed">
+                      넷리파이나 개인 클라우드 공간/블로그에 미리 별도 등록해놓으신 입지 지도 및 커뮤니티 투시도의 
+                      인터넷 주소(예: <code className="font-extrabold text-primary bg-white px-1 py-0.5 rounded shadow-2xs">https://your-site.netlify.app/images/map-actual.png</code>)를 그대로 전체 복사해와 아래의 칸에 붙여넣고 저장하세요.
+                      프로그래밍 코드를 일절 건드릴 필요 없이, 정적 배포 후에도 해당 인터넷 경로 파일이 깔끔하게 즉시 화면에 구현됩니다.
+                    </p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-extrabold text-gray-800 block">🗺️ 한화포레나 광역입지도 이미지 전체 인터넷 URL 주소</label>
+                    <input 
+                      type="text" 
+                      placeholder="http:// 또는 https:// 로 시작하는 전체 넷리파이 이미지 URL 주소"
+                      value={mapImageUrl}
+                      onChange={(e) => setMapImageUrl(e.target.value)}
+                      className="w-full px-4 py-2.5 border border-gray-200 outline-none focus:border-primary text-xs font-mono"
+                    />
+                    <span className="text-[10px] text-gray-400 font-medium">* 비워두고 저장 시 로컬에 탑재된 초호화 수려 기본 광역입지도가 출력됩니다.</span>
+                  </div>
+
+                  <div className="space-y-1 pt-2">
+                    <label className="text-xs font-extrabold text-gray-800 block">🏢 단지 다채로운 커뮤니티 입체 배치도 전체 인터넷 URL 주소</label>
+                    <input 
+                      type="text" 
+                      placeholder="http:// 또는 https:// 로 시작하는 전체 넷리파이 이미지 URL 주소"
+                      value={communityImageUrl}
+                      onChange={(e) => setCommunityImageUrl(e.target.value)}
+                      className="w-full px-4 py-2.5 border border-gray-200 outline-none focus:border-primary text-xs font-mono"
+                    />
+                    <span className="text-[10px] text-gray-400 font-medium">* 비워두고 저장 시 로컬에 탑재된 초호화 3D 단지 입체 커뮤니티 안내도가 출력됩니다.</span>
+                  </div>
+
+                  <div className="pt-3 flex flex-col sm:flex-row gap-2 font-semibold text-xs leading-none">
+                    <button
+                      type="button"
+                      onClick={handleResetToDefault}
+                      className="py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-extrabold rounded-sm transition-all cursor-pointer text-center"
+                    >
+                      🔄 이미지 주소 초기화 (한화포레나 원본 복원)
+                    </button>
+                    <button 
+                      type="submit" 
+                      className="flex-1 py-3 px-4 bg-primary hover:bg-[#32275d] text-white font-extrabold rounded-sm tracking-wide transition-all text-center cursor-pointer"
+                    >
+                      💾 이미지 연동 주소 저장 및 실시간 적용하기
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {activeTab === 'gallery' && (
+                <form onSubmit={handleSaveImages} className="space-y-4">
+                  <div className="p-3 bg-amber-50 border border-amber-100 text-amber-900 text-xs rounded-sm leading-relaxed mb-1">
+                    <p className="font-extrabold">📷 세대 내부 갤러리 슬라이드 이미지 주소 연동 (순서대로 9칸)</p>
+                    <p className="mt-1 font-semibold leading-relaxed">
+                      각 내부 촬영 컷별로 넷리파이 미디어나 개인 블로그, 이미지 서버 등에 개별 등록해주신 
+                      전체 인터넷 주소(URL)를 복사해서 붙여넣으신 뒤 저장을 클릭해 주세요. 
+                      비워둔 칸은 자동으로 포레나 아파트 견본 주택 내부 프리미엄 원본 촬영본으로 유려하게 장식됩니다!
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[36vh] overflow-y-auto p-1.5 border border-gray-150 rounded-xs bg-gray-50/50">
+                    {galleryUrls.map((url, i) => (
+                      <div key={i} className="space-y-1 p-2 bg-white border border-gray-100 rounded-xs shadow-3xs">
+                        <label className="text-[11px] font-extrabold text-[#0d1f38] block">{GALLERY_TITLES[i]}</label>
+                        <input 
+                          type="text" 
+                          placeholder="인터넷 이미지 주소 (https://...)"
+                          value={url}
+                          onChange={(e) => {
+                            const next = [...galleryUrls];
+                            next[i] = e.target.value;
+                            setGalleryUrls(next);
+                          }}
+                          className="w-full px-2.5 py-1.5 border border-gray-150 outline-none focus:border-primary text-[11px] font-mono rounded-xs"
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="pt-3 flex flex-col sm:flex-row gap-2 font-semibold text-xs leading-none">
+                    <button
+                      type="button"
+                      onClick={handleResetToDefault}
+                      className="py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-extrabold rounded-sm transition-all cursor-pointer text-center"
+                    >
+                      🔄 이미지 주소 초기화 (한화포레나 원본 복원)
+                    </button>
+                    <button 
+                      type="submit" 
+                      className="flex-1 py-3 px-4 bg-primary hover:bg-[#32275d] text-white font-extrabold rounded-sm tracking-wide transition-all text-center cursor-pointer"
+                    >
+                      💾 9장의 내부 슬라이드 주소 저장 및 실시간 적용하기
+                    </button>
+                  </div>
+                </form>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -1173,7 +1396,7 @@ const Contact = () => {
   );
 };
 
-const Footer = ({ transparentLogo }: { transparentLogo: string }) => (
+const Footer = ({ transparentLogo, onOpenAdmin }: { transparentLogo: string; onOpenAdmin: () => void }) => (
   <footer className="bg-gray-900 text-white py-20 px-6 font-sans">
     <div className="max-w-3xl mx-auto flex flex-col items-center text-center space-y-12">
       {/* Group logo and inquiry closely */}
@@ -1214,9 +1437,20 @@ const Footer = ({ transparentLogo }: { transparentLogo: string }) => (
       </div>
 
       {/* Divider */}
-      <div className="w-full border-t border-white/10 pt-8 text-xs text-gray-500">
-        <p className="mb-2">한화포레나 공식 협력점. 본 채널은 신뢰도 깊은 분양 정보를 전송합니다.</p>
-        <p>&copy; 2026 한화포레나. All rights reserved.</p>
+      <div className="w-full border-t border-white/10 pt-8 text-xs text-gray-500 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="text-center sm:text-left">
+          <p className="mb-2">한화포레나 공식 협력점. 본 채널은 신뢰도 깊은 분양 정보를 전송합니다.</p>
+          <p>&copy; 2026 한화포레나. All rights reserved.</p>
+        </div>
+        <div>
+          <button 
+            onClick={onOpenAdmin}
+            type="button"
+            className="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-md transition-all text-[11px] font-semibold border border-white/10 cursor-pointer"
+          >
+            ⚙️ 통합 관리자 설정 (이미지/SMS)
+          </button>
+        </div>
       </div>
     </div>
   </footer>
@@ -1705,7 +1939,7 @@ export default function App() {
       </section>
 
       <Contact />
-      <Footer transparentLogo={transparentLogo} />
+      <Footer transparentLogo={transparentLogo} onOpenAdmin={() => setIsSmsConfigOpen(true)} />
       <ReservationModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
       
       <SmsConfigModal isOpen={isSmsConfigOpen} onClose={() => setIsSmsConfigOpen(false)} />
