@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'motion/react';
 // @ts-ignore
 import forenaHeroImg from './assets/images/forena_hero_1779703103564.png';
 // @ts-ignore
-import forenaMapImg from './assets/images/forena_actual_map_png_1779778690378.png';
+import forenaMapImg from './assets/images/forena_actual_map_1780909348919.png';
 // @ts-ignore
 import forenaLogoWhiteImg from './assets/images/forena_logo_white_1779779726508.png';
 // @ts-ignore
@@ -55,13 +55,14 @@ import {
   UserCheck,
   RefreshCw,
   DollarSign,
-  Key
+  Key,
+  Camera
 } from 'lucide-react';
 
 // @ts-ignore
-import forenaCommunityImg from './assets/images/forena_community_1780042381071.png';
+import forenaCommunityImg from './assets/images/forena_community_1780910073167.png';
 // @ts-ignore
-import regeneratedCommunityImg from './assets/images/regenerated_image_1779789174361.jpg';
+import regeneratedCommunityImg from './assets/images/forena_community_1780910073167.png';
 
 // --- Components ---
 
@@ -1123,13 +1124,20 @@ const Gallery = () => {
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 select-none" 
                 />
                 
-
-
-
-                
-
-
-
+                <label 
+                  className="absolute bottom-1.5 right-1.5 z-30 w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/40 border border-white/15 shadow-xs cursor-pointer opacity-[0.08] hover:opacity-90 transition-all duration-300"
+                  onClick={(e) => e.stopPropagation()}
+                  title="갤러리 메인 이미지 변경"
+                >
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    className="hidden" 
+                    onChange={(e) => handleImageUpload(0, e)} 
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <Camera className="w-2.5 h-2.5 text-white select-none" />
+                </label>
               </div>
             </div>
   
@@ -1186,13 +1194,20 @@ const Gallery = () => {
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 select-none cursor-pointer" 
                       />
 
-
-
-
-
-
-
-
+                      <label 
+                        className="absolute bottom-1.5 right-1.5 z-30 w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/40 border border-white/15 shadow-xs cursor-pointer opacity-[0.08] hover:opacity-90 transition-all duration-300"
+                        onClick={(e) => e.stopPropagation()}
+                        title={`${img.title} 이미지 변경`}
+                      >
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          className="hidden" 
+                          onChange={(e) => handleImageUpload(originalIndex, e)} 
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                        <Camera className="w-2.5 h-2.5 text-white select-none" />
+                      </label>
                     </div>
                   );
                 })}
@@ -1587,17 +1602,37 @@ const RentalSection = () => {
   );
 };
 
+const isValidImageSource = (src: string | null): boolean => {
+  if (!src) return false;
+  const trimmed = src.trim();
+  return (
+    trimmed.startsWith('data:image/') ||
+    trimmed.startsWith('http://') ||
+    trimmed.startsWith('https://') ||
+    trimmed.startsWith('/') ||
+    trimmed.startsWith('.')
+  );
+};
+
 export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSmsConfigOpen, setIsSmsConfigOpen] = useState(false);
   const [isMapZoomOpen, setIsMapZoomOpen] = useState(false);
   const [mapImageSrc, setMapImageSrc] = useState<string>(() => {
-    const localMap = localStorage.getItem('forena_map_image');
-    return (localMap && localMap.length > 1000) ? localMap : forenaMapImg;
+    try {
+      const localMap = localStorage.getItem('forena_map_image');
+      return localMap && isValidImageSource(localMap) ? localMap : forenaMapImg;
+    } catch {
+      return forenaMapImg;
+    }
   });
   const [communityImageSrc, setCommunityImageSrc] = useState<string>(() => {
-    const localComm = localStorage.getItem('forena_community_image');
-    return (localComm && localComm.length > 1000) ? localComm : forenaCommunityImg;
+    try {
+      const localComm = localStorage.getItem('forena_community_image');
+      return localComm && isValidImageSource(localComm) ? localComm : forenaCommunityImg;
+    } catch {
+      return forenaCommunityImg;
+    }
   });
   const [isUploadingCommunity, setIsUploadingCommunity] = useState(false);
   const [transparentLogo, setTransparentLogo] = useState<string>('');
@@ -1656,6 +1691,34 @@ export default function App() {
     reader.readAsDataURL(file);
   };
 
+  useEffect(() => {
+    // 1. Fetch map from server
+    fetch("/api/current-map")
+      .then((res) => {
+        if (!res.ok) throw new Error("HTTP error");
+        return res.json();
+      })
+      .then((data) => {
+        if (data.success && data.base64) {
+          setMapImageSrc(data.base64);
+        }
+      })
+      .catch((err) => console.log("Map server fallback read used.", err));
+
+    // 2. Fetch community layout from server
+    fetch("/api/current-community")
+      .then((res) => {
+        if (!res.ok) throw new Error("HTTP error");
+        return res.json();
+      })
+      .then((data) => {
+        if (data.success && data.base64) {
+          setCommunityImageSrc(data.base64);
+        }
+      })
+      .catch((err) => console.log("Community layout server fallback read used.", err));
+  }, []);
+
   // 모바일 기기에서 표준 반응형 최적화 비율(width=device-width)로 깨짐 없이 깔끔하게 나오도록 설정
   useEffect(() => {
     const viewportMeta = document.querySelector('meta[name="viewport"]');
@@ -1664,63 +1727,6 @@ export default function App() {
         'content',
         'width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes'
       );
-    }
-  }, []);
-
-  useEffect(() => {
-    // 1. Instantly check the browser's local storage first which is our source of truth
-    const localMap = localStorage.getItem('forena_map_image');
-    if (localMap && localMap.length > 1000) {
-      setMapImageSrc(localMap);
-    } else {
-      // 2. Fall back to server if local storage is empty
-      fetch("/api/current-map")
-        .then((res) => {
-          if (!res.ok) throw new Error("HTTP error");
-          return res.json();
-        })
-        .then((data) => {
-          if (data.success && data.base64) {
-            setMapImageSrc(data.base64);
-          }
-        })
-        .catch((err) => console.log("Note: API server load map fallback used.", err));
-    }
-  }, []);
-
-  useEffect(() => {
-    // 1. Instantly check the browser's local storage first which is our source of truth
-    const localComm = localStorage.getItem('forena_community_image');
-    if (localComm && localComm.length > 1000) {
-      setCommunityImageSrc(localComm);
-    } else {
-      // 2. Fall back to server if local storage is empty
-      fetch("/api/current-community")
-        .then((res) => {
-          if (!res.ok) throw new Error("HTTP error");
-          return res.json();
-        })
-        .then((data) => {
-          if (data.success && data.base64) {
-            setCommunityImageSrc(data.base64);
-          }
-        })
-        .catch((err) => console.log("Note: API server load community fallback used.", err));
-    }
-  }, []);
-
-  // One-time cache reset to force-load the new, beautiful default assets and resolve caching issues
-  useEffect(() => {
-    const isReset = localStorage.getItem('forena_cache_reset_v4');
-    if (isReset !== 'true') {
-      localStorage.removeItem('forena_map_image');
-      localStorage.removeItem('forena_community_image');
-      for (let i = 0; i < 9; i++) {
-        localStorage.removeItem(`forena_gallery_${i}`);
-      }
-      localStorage.setItem('forena_cache_reset_v4', 'true');
-      console.log('One-time client image cache cleared to load fresh assets.');
-      window.location.reload();
     }
   }, []);
 
@@ -1797,20 +1803,34 @@ export default function App() {
           onClick={() => setIsMapZoomOpen(true)}
           className="relative mb-20 bg-white/50 backdrop-blur-xs p-4 sm:p-6 md:p-8 rounded-sm shadow-xl border border-gray-100 max-w-5xl mx-auto overflow-hidden group cursor-pointer"
         >
-
-          <img 
-            src={mapImageSrc} 
-            alt="한화포레나 인천학익 광역입지도" 
-            referrerPolicy="no-referrer"
-            onError={() => {
-              if (mapImageSrc !== forenaMapImg) {
-                setMapImageSrc(forenaMapImg);
-              }
-            }}
-            className="w-full h-auto object-contain rounded-xs transition-transform duration-700 group-hover:scale-[1.005]" 
-          />
-          
-
+          <div className="relative overflow-hidden w-full h-full">
+            <img 
+              src={mapImageSrc} 
+              alt="한화포레나 인천학익 광역입지도" 
+              referrerPolicy="no-referrer"
+              onError={() => {
+                if (mapImageSrc !== forenaMapImg) {
+                  setMapImageSrc(forenaMapImg);
+                }
+              }}
+              className="w-full h-auto object-contain rounded-xs transition-transform duration-700 group-hover:scale-[1.005]" 
+            />
+            
+            <label 
+              className="absolute bottom-1 right-1 z-30 w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/40 border border-white/15 shadow-xs cursor-pointer opacity-[0.08] hover:opacity-90 transition-all duration-300"
+              onClick={(e) => e.stopPropagation()}
+              title="지도 이미지 변경"
+            >
+              <input 
+                type="file" 
+                accept="image/*" 
+                className="hidden" 
+                onChange={handleMapImageUpload} 
+                onClick={(e) => e.stopPropagation()}
+              />
+              <Camera className="w-2.5 h-2.5 text-white select-none" />
+            </label>
+          </div>
         </motion.div>
 
         <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-8">
@@ -1918,20 +1938,34 @@ export default function App() {
               className="lg:col-span-7 flex justify-center w-full"
             >
               <div className="relative w-full max-w-2xl bg-gray-50 rounded-xs overflow-hidden shadow-xl border border-gray-200 p-3 hover:shadow-primary/5 transition-all duration-300 group">
-
-                <img 
-                  src={communityImageSrc} 
-                  alt="한화포레나 인천학익 커뮤니티 시설 동호수 및 3D 입체 투시도" 
-                  referrerPolicy="no-referrer"
-                  onError={() => {
-                    if (communityImageSrc !== forenaCommunityImg) {
-                      setCommunityImageSrc(forenaCommunityImg);
-                    }
-                  }}
-                  className="w-full h-auto object-contain rounded-xs transition-transform duration-500 group-hover:scale-[1.01]"
-                />
-                
-
+                <div className="relative overflow-hidden w-full h-full">
+                  <img 
+                    src={communityImageSrc} 
+                    alt="한화포레나 인천학익 커뮤니티 시설 동호수 및 3D 입체 투시도" 
+                    referrerPolicy="no-referrer"
+                    onError={() => {
+                      if (communityImageSrc !== forenaCommunityImg) {
+                        setCommunityImageSrc(forenaCommunityImg);
+                      }
+                    }}
+                    className="w-full h-auto object-contain rounded-xs transition-transform duration-500 group-hover:scale-[1.01]"
+                  />
+                  
+                  <label 
+                    className="absolute bottom-1 right-1 z-30 w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/40 border border-white/15 shadow-xs cursor-pointer opacity-[0.08] hover:opacity-90 transition-all duration-300"
+                    onClick={(e) => e.stopPropagation()}
+                    title="커뮤니티 이미지 변경"
+                  >
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      className="hidden" 
+                      onChange={handleCommunityImageUpload} 
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <Camera className="w-2.5 h-2.5 text-white select-none" />
+                  </label>
+                </div>
               </div>
             </motion.div>
           </div>
